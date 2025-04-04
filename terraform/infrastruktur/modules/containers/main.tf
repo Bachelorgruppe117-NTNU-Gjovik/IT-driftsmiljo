@@ -188,6 +188,10 @@ resource "azurerm_container_app" "capp" {
         name        = "DBSECRET"
         secret_name = "dbsecret"
       }
+      env {
+        name = "ENTRAIDENTITY"
+        value = azurerm_user_assigned_identity.ca_identity.name
+      }
     }
     revision_suffix = "v1"
   }

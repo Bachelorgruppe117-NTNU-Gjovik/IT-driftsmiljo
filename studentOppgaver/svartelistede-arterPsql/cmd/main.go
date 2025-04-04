@@ -30,7 +30,7 @@ func main() {
 
     psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
     "password=%s dbname=%s sslmode=require",
-    host, port, user, os.Getenv("DBSECRET"), dbname)
+    host, port, os.Getenv("ENTRAIDENTITY"), os.Getenv("TOKEN"), dbname)
 
     var err error
     database.DB, err = sql.Open("postgres", psqlInfo)
