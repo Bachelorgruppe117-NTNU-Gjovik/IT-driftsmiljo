@@ -16,10 +16,35 @@ variable "rg_location_static" {
   default     = "westeurope"
 }
 
-variable "subnet_id" {
-  description = "The id of the subnet"
+variable "rg_name_storage" {
+  description = "Name for storage rg"
   type        = string
 }
+
+variable "rg_location_storage" {
+  description = "Location for storage rg"
+  type        = string
+  default     = "westeurope"
+}
+
+variable "random_password_db_capp" {
+  description = "Generates random password for db secrets"
+  type = map(object({
+    name = string # "db_password_<cApp name>"
+  }))
+}
+
+# Identity - KEY NAME OF EACH OBJECT MUST BE IDENTICAL TO CONTAINER APP NAME
+variable "ca_identity" {
+  description = "Identities for container access to key vault"
+  type = map(object({
+    name = string # "ca_id_<cApp name>"
+    rg   = string
+  }))
+}
+
+
+
 
 variable "law_name" {
   description = "Name of the log analytics workspace"
@@ -45,7 +70,25 @@ variable "cae_name" {
   default     = "CA-Enviornment001"
 }
 
+variable "cenv_subnet_id" {
+  description = "The id of the subnet"
+  type        = string
+}
+/*
+variable "dbserversecretId" {
+  description = "ID of db secret"
+  type = string
+}
+*/
+variable "reguname" {
+  description = "Username for github container registry"
+  type        = string
+}
 
+variable "regtoken" {
+  description = "Password for github container registry"
+  type        = string
+}
 
 variable "container" {
   description = "A map of variables for container"
@@ -53,12 +96,11 @@ variable "container" {
     name           = string
     revmode        = optional(string, "Single")
     regserver      = optional(string, "ghcr.io")
-    reguname       = string,
-    regtoken       = string
     trafficweight  = optional(number, 100)
     latestrevision = optional(bool, true)
-    targetport     = optional(number, 5000)
+    targetport     = optional(number, 8080)
     external       = optional(bool, true)
+    ip_restriction_range = string
     image          = string
     cpu            = optional(number, 0.25)
     memory         = optional(string, "0.5Gi")

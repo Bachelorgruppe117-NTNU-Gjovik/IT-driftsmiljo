@@ -10,7 +10,7 @@ terraform {
     storage_account_name = "sabackendsfbgel2py5"
     container_name       = "backend-container"
     key                  = "infragjovik.terraform.tfstate"
-    use_azuread_auth = true
+    use_azuread_auth     = true
   }
 }
 
@@ -41,8 +41,6 @@ resource "azurerm_resource_group" "rgstorage" {
 
 
 # Storage of terraform variables
-
-
 resource "azurerm_storage_account" "sa" {
   name                      = "envstoragegjovik246"
   resource_group_name       = azurerm_resource_group.rgstorage.name
@@ -63,8 +61,8 @@ resource "azurerm_storage_blob" "ctemplate" {
   storage_account_name   = azurerm_storage_account.sa.name
   storage_container_name = azurerm_storage_container.sc.name
   type                   = "Block"
-  source             = "${var.rootPath}${var.ctemplatePath}"
-  content_md5 = "${md5(file("${var.rootPath}${var.ctemplatePath}"))}" // Forces upload of new file upon changes in file
+  source                 = "${var.rootPath}${var.ctemplatePath}"
+  content_md5            = md5(file("${var.rootPath}${var.ctemplatePath}")) // Forces upload of new file upon changes in file
 }
 
 resource "azurerm_storage_blob" "dbtemplate" {
@@ -73,7 +71,7 @@ resource "azurerm_storage_blob" "dbtemplate" {
   storage_container_name = azurerm_storage_container.sc.name
   type                   = "Block"
   source                 = "${var.rootPath}${var.dbtemplatePath}"
-  content_md5 = "${md5(file("${var.rootPath}${var.dbtemplatePath}"))}" // Forces upload of new file upon changes in file
+  content_md5            = md5(file("${var.rootPath}${var.dbtemplatePath}")) // Forces upload of new file upon changes in file
 }
 
 resource "azurerm_storage_blob" "tfvariables" {
@@ -82,75 +80,46 @@ resource "azurerm_storage_blob" "tfvariables" {
   storage_container_name = azurerm_storage_container.sc.name
   type                   = "Block"
   source                 = "${var.rootPath}${var.tfvarsPath}"
-  content_md5 = "${md5(file("${var.rootPath}${var.tfvarsPath}"))}" // Forces upload of new file upon changes in file
+  content_md5            = md5(file("${var.rootPath}${var.tfvarsPath}")) // Forces upload of new file upon changes in file
 }
 
-resource "random_string" "randomkvname" {
-  length  = 10
-  special = false
-  upper   = false
+resource "azurerm_resource_group" "rg_dynamic" {
+  for_each = var.rg_dynamic
+
+  name     = each.value.name
+  location = each.value.location
 }
 
-data "azurerm_client_config" "current" {}
-
-# Key vault for storage of sensitive values.
-resource "azurerm_key_vault" "kv" {
-  name                       = "keyvault${random_string.randomkvname.result}"
-  location                   = azurerm_resource_group.rgstorage.location
-  resource_group_name        = azurerm_resource_group.rgstorage.name
-  tenant_id                  = data.azurerm_client_config.current.tenant_id
-  sku_name                   = "premium"
-  soft_delete_retention_days = 7
-
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
-
-    key_permissions = [
-      "Create",
-      "Get",
-      "Delete",
-      "Purge"
-    ]
-
-    secret_permissions = [
-      "Set",
-      "Get",
-      "Delete",
-      "Purge",
-      "Recover"
-    ]
-  }
+resource "azurerm_resource_group" "rg_static" {
+  name     = var.rg_name_static
+  location = var.rg_location_static
 }
 
-resource "random_password" "randomsdbsecret" {
-  length = 20
+module "containers" {
+  depends_on              = [azurerm_resource_group.rg_dynamic, azurerm_resource_group.rg_static]
+  source                  = "./modules/containers"
+  rg_name_static          = var.rg_name_static
+  rg_location_static      = var.rg_location_static
+  rg_name_storage         = azurerm_resource_group.rgstorage.name
+  rg_location_storage     = azurerm_resource_group.rgstorage.location
+  law_name                = var.law_name
+  law_sku                 = var.law_sku
+  law_retention           = var.law_retention
+  ca_identity             = var.ca_identity
+  random_password_db_capp = var.random_password_db_capp
+  cae_name                = var.cae_name
+  container               = var.container
+  cenv_subnet_id          = module.network.subnet_capp_id
+  //dbserversecretId = var.dbserversecretId
+  reguname = var.reguname
+  regtoken = var.regtoken
 }
 
-# Database admin password generated with random_string
-resource "azurerm_key_vault_secret" "dbserversecret" {
-  name         = "db-server-admin-secret"
-  value        = random_password.randomsdbsecret.result
-  key_vault_id = azurerm_key_vault.kv.id
-}
-
-
-module "deployments" {
-  source = "./deployments"
-
-  # To use in deployments
-  rg_dynamic         = var.rg_dynamic
-  rg_name_static     = var.rg_name_static
-  rg_location_static = var.rg_location_static
-
-  # To use in containers
-  law_name      = var.law_name
-  law_sku       = var.law_sku
-  law_retention = var.law_retention
-  cae_name      = var.cae_name
-  container     = var.container
-
-  # To use in database
+module "database" {
+  depends_on                          = [azurerm_resource_group.rg_dynamic, azurerm_resource_group.rg_static, module.network]
+  source                              = "./modules/database"
+  rg_name_static                      = var.rg_name_static
+  rg_location_static                  = var.rg_location_static
   postgreserver_name                  = var.postgreserver_name
   postgreserver_skuname               = var.postgreserver_skuname
   postgreserver_storage_mb            = var.postgreserver_storage_mb
@@ -159,13 +128,20 @@ module "deployments" {
   postgreserver_redundant_backup      = var.postgreserver_redundant_backup
   postgreserver_auto_grow             = var.postgreserver_auto_grow
   postgreserver_admin_uname           = var.postgreserver_admin_uname
-  postgreserver_admin_password        = azurerm_key_vault_secret.dbserversecret.value
+  postgreserver_admin_password        = module.containers.postgreserver_admin_password
   postgreserver_version               = var.postgreserver_version
   postgreserver_public_network_access = var.postgreserver_public_network_access
   postgreserver_zone                  = var.postgreserver_zone
   postdb                              = var.postdb
+  subnet_id                           = module.network.subnet_db_id
+  privdnszone_id                      = module.network.privdnszone_id
+}
 
-  #To use in network
+module "network" {
+  depends_on                             = [azurerm_resource_group.rg_dynamic, azurerm_resource_group.rg_static]
+  source                                 = "./modules/network"
+  rg_name_static                         = var.rg_name_static
+  rg_location_static                     = var.rg_location_static
   nsg_name_db                            = var.nsg_name_db
   nsg_name_capp                          = var.nsg_name_capp
   vnet_name                              = var.vnet_name

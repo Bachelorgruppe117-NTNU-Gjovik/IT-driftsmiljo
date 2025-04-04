@@ -41,12 +41,11 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     env:
-      # Github container registry
-      REG_UNAME: ${{ secrets.REG_UNAME }}
-      REG_TOKEN: ${{ secrets.REG_TOKEN }}
       # Input variables
-      TF_VAR_postgreserver_admin_uname: ${{ secrets.DB_SERVER_UNAME }}
-      TF_VAR_rootPath: ${{ github.workspace }}
+      TF_VAR_reguname: ${{ secrets.REG_UNAME }}  # Github container registry credentials
+      TF_VAR_regtoken: ${{ secrets.REG_TOKEN }}
+      
+      TF_VAR_rootPath: ${{ github.workspace }} # Absolute path to terraform.tfvars.json
       
     steps:
       - name: Checkout
@@ -101,6 +100,7 @@ jobs:
         run: |
           cd terraform/infrastruktur
           terraform init
+
 
       - name: Terraform plan
         id: plan

@@ -2,7 +2,7 @@ package main
 
 import (
 	"database/sql"
-    "fmt"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,24 +12,25 @@ import (
 	"svarteliste/frontend"
 	"svarteliste/userform"
 
-//	_ "github.com/go-sql-driver/mysql"
-    _ "github.com/lib/pq"
+	//	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 )
 const (
-  host     = "localhost"
+  host     = "postgresql-flexible-server-rgstatic001.postgres.database.azure.com"
   port     = 5432
-  user     = ""
+  user     = "ntnuadmin"
   password = ""
-  dbname   = "svartelistedb"
+  dbname   = "svartelistede-arterpsql-db"
 )
 
 
 
 func main() {
-	
+
+
     psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-    "password=%s dbname=%s sslmode=disable",
-    host, port, user, password, dbname)
+    "password=%s dbname=%s sslmode=require",
+    host, port, user, os.Getenv("DBSECRET"), dbname)
 
     var err error
     database.DB, err = sql.Open("postgres", psqlInfo)
@@ -110,7 +111,7 @@ func main() {
 	// Start HTTP server
 	log.Println("Running on port", port)
 	//HTTP (used during testing)
-	err = http.ListenAndServe("localhost:"+port, nil)
+	err = http.ListenAndServe("0.0.0.0:"+port, nil)
 	//HTTPS (used for normal operation, it needs to be https to share location on server)
 	//err = http.ListenAndServeTLS(":"+port, "./cmd/localhost.crt", "./cmd/localhost.key", nil)
 	if err != nil {

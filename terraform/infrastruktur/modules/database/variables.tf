@@ -61,6 +61,7 @@ variable "postgreserver_auto_grow" {
 variable "postgreserver_admin_uname" {
   description = "Username for the administrator user"
   type        = string
+  default     = "ntnuadmin"
 }
 
 variable "postgreserver_admin_password" {
@@ -91,6 +92,7 @@ variable "subnet_id" {
   type        = string
 }
 
+
 variable "privdnszone_id" {
   description = "The id of the private dns zone"
   type        = string
@@ -100,16 +102,8 @@ variable "postdb" {
   description = "Variables for a postgresql database"
   type = map(object({
     name            = string
-    charset         = string
-    collation       = string
-    prevent_destroy = bool
+    charset         = optional(string, "UTF8")
+    collation       = optional(string, "en_US.utf8")
+    prevent_destroy = optional(bool, false)
   }))
-  default = {
-    "dfpostdb" = {
-      name            = "dfdapostdb"
-      charset         = "UTF8"
-      collation       = "en_US.utf8"
-      prevent_destroy = false
-    }
-  }
 }

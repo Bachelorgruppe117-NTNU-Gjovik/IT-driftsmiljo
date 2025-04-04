@@ -1,40 +1,33 @@
 variable "rootPath" {
   description = "Absolute path to infrastructure project"
-  type = string
+  type        = string
 }
 
 variable "ctemplatePath" {
   description = "Path to container template file"
   type        = string
-  default =  "/terraform/infrastruktur/containerObj.json"
+  default     = "/terraform/infrastruktur/templates/containerObj.json"
 }
 
 variable "dbtemplatePath" {
   description = "Path to database template file"
   type        = string
-  default = "/terraform/infrastruktur/databaseObj.json"
+  default     = "/terraform/infrastruktur/templates/databaseObj.json"
 }
 
 variable "tfvarsPath" {
   description = "Path to .tfvars.json file"
   type        = string
-  default = "/terraform/infrastruktur/terraform.tfvars.json"
+  default     = "/terraform/infrastruktur/terraform.tfvars.json"
 }
 
 # resource group
-
 variable "rg_dynamic" {
   description = "A map of resource groups variables"
   type = map(object({
     name     = string
-    location = string
+    location = optional(string, "westeurope")
   }))
-  default = {
-    "dfrg" = {
-      name     = "dfrg"
-      location = "westeurpoe"
-    }
-  }
 }
 
 
@@ -56,7 +49,6 @@ variable "rg_location_static" {
 
 # Module: containerapp
 
-
 variable "law_name" {
   description = "Name of the log analytics workspace"
   type        = string
@@ -75,12 +67,37 @@ variable "law_retention" {
   default     = 30
 }
 
+variable "random_password_db_capp" {
+  description = "Generates random password for db secrets"
+  type = map(object({
+    name = string # "db_password_<cApp name>"
+  }))
+}
+
+# Identity - KEY NAME OF EACH OBJECT MUST BE IDENTICAL TO CONTAINER APP NAME
+variable "ca_identity" {
+  description = "Identities for container access to key vault"
+  type = map(object({
+    name = string # "ca_identity_<cApp name>"
+    rg   = string
+  }))
+}
+
 variable "cae_name" {
   description = "Name of the container app enviorment"
   type        = string
   default     = "CA-Enviornment001"
 }
 
+variable "reguname" {
+  description = "Username for github container registry"
+  type        = string
+}
+
+variable "regtoken" {
+  description = "Password for github container registry"
+  type        = string
+}
 
 variable "container" {
   description = "A map of variables for container"
@@ -88,12 +105,11 @@ variable "container" {
     name           = string
     revmode        = optional(string, "Single")
     regserver      = optional(string, "ghcr.io")
-    reguname       = string
-    regtoken       = string
     trafficweight  = optional(number, 100)
     latestrevision = optional(bool, true)
     targetport     = optional(number, 5000)
     external       = optional(bool, true)
+    ip_restriction_range = string
     image          = string
     cpu            = optional(number, 0.25)
     memory         = optional(string, "0.5Gi")
@@ -167,13 +183,15 @@ variable "postgreserver_auto_grow" {
 variable "postgreserver_admin_uname" {
   description = "Username for the administrator user"
   type        = string
+  default     = "ntnuadmin"
 }
 
+/*
 variable "postgreserver_admin_password" {
   description = "Password for the administrator user"
   type        = string
-  default     = ""
 }
+*/
 
 variable "postgreserver_version" {
   description = "Version number of the postgresql server"
@@ -260,7 +278,7 @@ variable "subnet_db_address_prefixes" {
 variable "subnet_capp_address_prefixes" {
   description = "The address prefixes for the container apps subnet"
   type        = set(string)
-  default     = ["10.0.3.0/24"]
+  default     = ["10.0.32.0/20"]
 }
 
 variable "subnet_service_endpoint" {
