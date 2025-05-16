@@ -22,9 +22,11 @@ variable "sms_number" {
 variable "capp_ids" {
     description = "The ids for the container apps"
     type = set(string)
+    default = [ ]
 }
 
 variable "psql_fs_id" {
     description = "The ids for the PostgreSQL databases"
     type = set(string)
+    default = [ ]
 }
