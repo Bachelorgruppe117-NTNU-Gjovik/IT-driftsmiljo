@@ -79,11 +79,11 @@ jobs:
           curl -X DELETE \
             -H "Authorization: Bearer ${{ secrets.REG_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/orgs/Bachelorgruppe117-NTNU-Gjovik/packages/container/${{ steps.lowerstring.outputs.lowercase }}-app"
+            "https://api.github.com/cybersondre/packages/container/${{ steps.lowerstring.outputs.lowercase }}-app"
 
   startWF:
     needs: remove
-    uses: Bachelorgruppe117-NTNU-Gjovik/IT-driftsmiljo/.github/workflows/buildTerraform.yml@main
+    uses: cybersondre/IT-driftsmiljo/.github/workflows/buildTerraform.yml@main
     secrets: inherit
     with:
       STUDENT_FOLDER: ${{needs.remove.outputs.studentFolderName}}
