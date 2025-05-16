@@ -25,7 +25,7 @@ Ta vare på objektet som kommer i retur, da du ikke får hentet dette ut igjen.
 - "Key Vault Administrator":
 ```
 az role assignment create \
-  --assignee <appId> \
+  --assignee <APPID> \
   --role "Key Vault Administrator" \
   --scope /subscriptions/<SUBSCRIPTION_ID>
 ```
