@@ -7,7 +7,7 @@ terraform {
   }
   backend "azurerm" {
     resource_group_name  = "rg-backend"
-    storage_account_name = "sabackendsfbgel2py5"
+    storage_account_name = "sabackendopgacne0uc"
     container_name       = "backend-container"
     key                  = "infragjovik.terraform.tfstate"
     use_azuread_auth     = true
