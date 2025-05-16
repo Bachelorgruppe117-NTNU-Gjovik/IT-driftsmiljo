@@ -106,7 +106,7 @@ jobs:
     
   startWF:
     needs: build-and-push
-    uses: Bachelorgruppe117-NTNU-Gjovik/IT-driftsmiljo/.github/workflows/buildTerraform.yml@main
+    uses: cybersondre/IT-driftsmiljo/.github/workflows/buildTerraform.yml@main
     secrets: inherit
     with:
       STUDENT_FOLDER: ${{needs.build-and-push.outputs.studentFolderName}}
