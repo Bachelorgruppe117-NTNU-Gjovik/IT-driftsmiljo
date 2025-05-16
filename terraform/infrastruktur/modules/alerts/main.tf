@@ -19,7 +19,7 @@ resource "azurerm_monitor_action_group" "mag" {
 }
 
 resource "azurerm_monitor_metric_alert" "mma_high_cpu_capp" {
-  count = var.capp_ids == [ ] ? 0 : 1
+  count = var.capp_ids == [ ] ? 1 : 0
   name                = "high-cpu-alert-capp"
   resource_group_name = var.rg_name_alerts
   scopes              = var.capp_ids
@@ -41,7 +41,7 @@ resource "azurerm_monitor_metric_alert" "mma_high_cpu_capp" {
 }
 
 resource "azurerm_monitor_metric_alert" "mma_high_memory_capp" {
-  count = var.capp_ids == [ ] ? 0 : 1
+  count = var.capp_ids == [ ] ? 1 : 0
   name                = "high-memory-alert-capp"
   resource_group_name = var.rg_name_alerts
   scopes              = var.capp_ids
@@ -63,7 +63,7 @@ resource "azurerm_monitor_metric_alert" "mma_high_memory_capp" {
 }
 
 resource "azurerm_monitor_metric_alert" "mma_high_requests_capp" {
-  count = var.capp_ids == [ ] ? 0 : 1
+  count = var.capp_ids == [ ] ? 1 : 0
   name                = "high-requests-alert-capp"
   resource_group_name = var.rg_name_alerts
   scopes              = var.capp_ids
@@ -85,7 +85,7 @@ resource "azurerm_monitor_metric_alert" "mma_high_requests_capp" {
 }
 
 resource "azurerm_monitor_metric_alert" "mma_high_tps_db" {
-  count = var.psql_fs_id == [ ] ? 0 : 1
+  count = var.psql_fs_id == [ ] ? 1 : 0
   name                = "high-transactions-per-second-alert-db"
   resource_group_name = var.rg_name_alerts
   scopes              = var.psql_fs_id
@@ -107,7 +107,7 @@ resource "azurerm_monitor_metric_alert" "mma_high_tps_db" {
 }
 
 resource "azurerm_monitor_metric_alert" "mma_connection_failed_db" {
-  count = var.psql_fs_id == [ ] ? 0 : 1
+  count = var.psql_fs_id == [ ] ? 1 : 0
   name                = "connection-failed-alert-db"
   resource_group_name = var.rg_name_alerts
   scopes              = var.psql_fs_id
